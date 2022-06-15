@@ -1,5 +1,6 @@
 package com.exchange.kafkaexchange.config
 
+import com.exchange.kafkaexchange.Message
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.ByteArraySerializer
 import org.apache.kafka.common.serialization.StringSerializer
@@ -10,6 +11,7 @@ import org.springframework.context.annotation.PropertySource
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.core.ProducerFactory
+import org.springframework.kafka.support.serializer.JsonSerializer
 import java.util.*
 
 @Configuration
@@ -33,17 +35,17 @@ class KafkaProducerConfig {
         val producerProps = mutableMapOf<String, Any>()
         producerProps[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapServers
         producerProps[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
-        producerProps[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
+        producerProps[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = JsonSerializer::class.java
         return producerProps
     }
 
     @Bean
-    fun producerFactory(): ProducerFactory<String, String> {
+    fun producerFactory(): ProducerFactory<String, Message> {
         return DefaultKafkaProducerFactory(producerConfig())
     }
 
     @Bean
-    fun kafkaTemplate(producerFactory: ProducerFactory<String, String>): KafkaTemplate<String, String> {
+    fun kafkaTemplate(producerFactory: ProducerFactory<String, Message>): KafkaTemplate<String, Message> {
         return KafkaTemplate(producerFactory)
     }
 }

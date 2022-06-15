@@ -1,7 +1,7 @@
 package com.exchange.kafkaexchange.config
 
+import com.exchange.kafkaexchange.Message
 import org.apache.kafka.clients.consumer.ConsumerConfig
-import org.apache.kafka.common.protocol.Message
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -21,20 +21,18 @@ class KafkaConsumerConfig {
     private fun consumerConfig(): Map<String, Any> {
         val producerProps = mutableMapOf<String, Any>()
         producerProps[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapServers
-        producerProps[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
-        producerProps[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
         return producerProps
     }
 
     @Bean
-    fun consumerFactory(): ConsumerFactory<String, Message> {
-        var jsonDeserializer: JsonDeserializer<Message> = JsonDe
+    fun consumerFactory(): DefaultKafkaConsumerFactory<String, com.exchange.kafkaexchange.Message> {
+        var jsonDeserializer: JsonDeserializer<Message> = JsonDeserializer()
         jsonDeserializer.addTrustedPackages("com.exchange")
-        return DefaultKafkaConsumerFactory(consumerConfig(), JsonDeserializer(), jsonDeserializer)
+        return DefaultKafkaConsumerFactory(consumerConfig(), StringDeserializer(), jsonDeserializer)
     }
 
     @Bean
-    fun kafkaListenerContainerFactory(): KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, Message>> {
+    fun kafkaListenerContainerFactory(): KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, com.exchange.kafkaexchange.Message>> {
         var factory: ConcurrentKafkaListenerContainerFactory<String, Message>  = ConcurrentKafkaListenerContainerFactory()
         factory.consumerFactory = consumerFactory()
         return factory
